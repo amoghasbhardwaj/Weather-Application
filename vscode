@@ -1,0 +1,117 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() {
+  runApp(MaterialApp(
+    home: weather(),
+  ));
+}
+
+// ignore: camel_case_types
+class weather extends StatefulWidget {
+  @override
+  _weatherState createState() => _weatherState();
+}
+
+// ignore: camel_case_types
+class _weatherState extends State<weather> {
+  TextEditingController inputcontroller = new TextEditingController();
+  String city;
+  double temp = 34;
+  double feelsLike = 36;
+  String env = 'smoke';
+  double windspeed = 12.8;
+
+  void getWeatherInfo() async {
+    city = inputcontroller.text;
+    var response = await http.get(Uri.parse(
+        "http://api.openweathermap.org/data/2.5/weather?q=${city},{state%20code}&appid=99aededa8ad7c2b0ee2f7ca9837279dc"));
+
+    Map details = jsonDecode(response.body);
+    setState(() {
+      temp = (details['main']['temp'] - 273.15).roundToDouble();
+      feelsLike = (details['main']['feels_like']).roundToDouble();
+      windspeed = details['wind']['speed'];
+      env = details['weather'][0]['main'];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.amber,
+      appBar: AppBar(
+        title: Text('Weather'),
+        backgroundColor: Colors.grey[900],
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 30),
+            Text('Enter City',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white)),
+            SizedBox(height: 20),
+            TextField(
+              controller: inputcontroller,
+              decoration: InputDecoration(
+                hintText: 'Type City Name Here',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              child: Text('Get Weather Info'),
+              onPressed: getWeatherInfo,
+            ),
+            Divider(height: 10),
+            Text(
+              'Temprature:',
+              style: TextStyle(fontSize: 15),
+            ),
+            SizedBox(height: 10),
+            Text(
+              '$temp Celcius',
+              style: TextStyle(fontSize: 15),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Feels like:',
+              style: TextStyle(fontSize: 15),
+            ),
+            SizedBox(height: 10),
+            Text(
+              '$feelsLike Celcius',
+              style: TextStyle(fontSize: 15),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Environment:',
+              style: TextStyle(fontSize: 15),
+            ),
+            SizedBox(height: 10),
+            Text(
+              '$env',
+              style: TextStyle(fontSize: 15),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Windspeed:',
+              style: TextStyle(fontSize: 15),
+            ),
+            SizedBox(height: 10),
+            Text(
+              '$windspeed Km/hr',
+              style: TextStyle(fontSize: 15),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
